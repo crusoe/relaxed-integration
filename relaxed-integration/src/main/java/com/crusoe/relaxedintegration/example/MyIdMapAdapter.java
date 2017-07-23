@@ -12,6 +12,7 @@ public class MyIdMapAdapter implements IdMapAdapter {
 	@Override
 	public Object getIdByFeature(String subSys, Object... features) {
 		// 实现依次根据特征值1，特征值2，特征值3...获取子系统中对应的id
+		//dev提交
 		return 123;
 	}
 
