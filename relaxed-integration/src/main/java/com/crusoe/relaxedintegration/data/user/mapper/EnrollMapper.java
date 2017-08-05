@@ -1,6 +1,5 @@
 package com.crusoe.relaxedintegration.data.user.mapper;
 
-
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
@@ -8,11 +7,11 @@ import org.springframework.stereotype.Repository;
 
 import com.crusoe.relaxedintegration.data.user.bean.GEnroll;
 import com.crusoe.relaxedintegration.data.user.bean.NeuUserHierarchyBean;
-
-
+import com.crusoe.relaxedintegration.data.user.bean.RUser;
 
 @Repository
 public interface EnrollMapper {
+	
 	/**
 	 * 添加赛事执行人员
 	 * @param neuUserId 用户的id

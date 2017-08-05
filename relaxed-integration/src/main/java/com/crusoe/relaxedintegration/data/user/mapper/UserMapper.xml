@@ -26,9 +26,47 @@
         <result column="password" property="password"  javaType="String" jdbcType="VARCHAR"/>
         <result column="neuUserId" property="neuUserId"  javaType="int" jdbcType="INTEGER"/>
     </resultMap>
+    <resultMap id="rUser" type="com.crusoe.relaxedintegration.data.user.bean.RUser">  
+        <result column="rUserId" property="rUserId" javaType="Integer" jdbcType="INTEGER"/>
+        <result column="s1UserId" property="s1UserId" javaType="String" jdbcType="VARCHAR"/>
+        <result column="s2UserId" property="s2UserId" javaType="String" jdbcType="VARCHAR"/>
+        <result column="s3UserId" property="s3UserId" javaType="String" jdbcType="VARCHAR"/>
+        <result column="feature1" property="feature1" javaType="String" jdbcType="VARCHAR"/>
+        <result column="feature2" property="feature2" javaType="String" jdbcType="VARCHAR"/>
+        <result column="feature3" property="feature3" javaType="String" jdbcType="VARCHAR"/>
+    </resultMap>
     <sql id="Base_Column_List" >
 	   neuUser.neuUserId,gUserId,wUserId,gtUserId,role
 	</sql> 
+	
+	<select id="getRUser" resultMap="rUser" statementType="STATEMENT">  
+		insert into ruser(rUserId, ${source}UserId, feature1, feature2, feature3)
+		select @rUserId:=
+		ifnull((select rUserId from 
+							(select @sUserId:=${userId}, @feature1:='${feature1}', @feature2:='${feature2}', @feature3:='${feature3}') t1,  -- 会话级变量在内联视图中初始化
+							ruser 
+							where ${source}UserId=@sUserId), 
+			ifnull((select rUserId from ruser where feature1=@feature1), 
+				ifnull((select rUserId from ruser where feature2=@feature2),
+					(select rUserId from ruser where feature3=@feature3)))), -- 主键
+			@sUserId, @feature1, @feature2, @feature3
+		ON DUPLICATE KEY UPDATE 
+			${source}UserId=ifnull(values(${source}UserId), ${source}UserId),
+			feature1=ifnull(values(feature1), feature1),
+			feature2=ifnull(values(feature2), feature2),
+			feature3=ifnull(values(feature3), feature3);
+		
+		select * from ruser where rUserId=ifnull(@rUserId, LAST_INSERT_ID());
+  		
+	</select>    
+	
+	
+	
+	
+	
+	
+	
+	<!--below is old code--> 
 	
    <!--根据unionId查找neuAdminBean--> 
     <select id="searchNeuAdminByUnionId" resultMap="neuUser" parameterType="java.lang.String">  

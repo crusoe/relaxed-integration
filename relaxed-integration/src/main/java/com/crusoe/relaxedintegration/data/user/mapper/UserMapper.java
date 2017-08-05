@@ -1,7 +1,5 @@
 package com.crusoe.relaxedintegration.data.user.mapper;
 
-import java.util.List;
-
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -11,10 +9,17 @@ import com.crusoe.relaxedintegration.data.user.bean.GUserBean;
 import com.crusoe.relaxedintegration.data.user.bean.GtEnroll;
 import com.crusoe.relaxedintegration.data.user.bean.GtUserBean;
 import com.crusoe.relaxedintegration.data.user.bean.NeuUserBean;
+import com.crusoe.relaxedintegration.data.user.bean.RUser;
 
 @Repository
 public interface UserMapper {
 
+	RUser getRUser(String source, String userId, String feature1, String feature2, String feature3);
+
+	
+	
+	
+	//old code below
 	/**
 	 * 更新用户信息
 	 * @param admin
