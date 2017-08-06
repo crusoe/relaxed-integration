@@ -1,5 +1,7 @@
 package com.crusoe.relaxedintegration.data.user.bean;
 
+import java.lang.reflect.Field;
+
 public class RUser {
 	private Integer rUserId;
 	private String s1UserId;
@@ -50,4 +52,20 @@ public class RUser {
 	public void setFeature3(String feature3) {
 		this.feature3 = feature3;
 	}
+	
+	public String getTargetUserId(String subSys) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException{
+        Field declaredField = this.getClass().getDeclaredField(subSys+"UserId");
+        declaredField.setAccessible(true);
+        return (String) declaredField.get(this);
+	}
 }
+
+
+
+
+
+
+
+
+
+

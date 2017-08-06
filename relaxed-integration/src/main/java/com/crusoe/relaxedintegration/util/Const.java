@@ -11,7 +11,7 @@ public class Const {
 	/**接口状态参数错*/
 	public static final int STATUS_FAILURE_PARAM = -1;
 	/**整合系统自己*/
-	public static final String SYSTEM_INTEGRATION = "i";
+	public static final String SYSTEM_INTEGRATION = "r";
 	/**赛客报名*/
 	public static final String SYSTEM_GEEXEK_ENROLL = "g";
 	/**赛客计时*/
