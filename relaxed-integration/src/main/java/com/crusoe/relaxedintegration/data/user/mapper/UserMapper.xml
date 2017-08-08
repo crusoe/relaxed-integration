@@ -1,349 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
-<mapper namespace="com.neusoft.idmap.mapper.IdMapMapper">  
-    <resultMap id="neuUser" type="com.neusoft.idmap.bean.NeuUserBean">  
-        <result column="neuUserId" property="neuUserId" javaType="int" jdbcType="INTEGER"/>
-        <result column="gUserId" property="gUserId" javaType="int" jdbcType="INTEGER"/>
-        <result column="wUserId" property="wUserId" javaType="int" jdbcType="INTEGER"/>
-        <result column="gtUserId" property="gtUserId"  javaType="int" jdbcType="INTEGER"/>
-        <result column="role" property="role"  javaType="int" jdbcType="INTEGER"/>
-    </resultMap> 
-    <resultMap id="gEnroll" type="com.neusoft.idmap.bean.GEnroll">
-        <result column="userId" property="userId" javaType="int" jdbcType="INTEGER"/>  
-        <result column="callPhone" property="phoneNum" javaType="String" jdbcType="VARCHAR"/>
-        <result column="trueName" property="username"  javaType="String" jdbcType="VARCHAR"/>
-        <result column="identityCard" property="idcard" javaType="String" jdbcType="VARCHAR"/>
-        <result column="openId" property="openId" javaType="String" jdbcType="VARCHAR"/>
-    </resultMap>
-    <resultMap id="gtEnroll" type="com.neusoft.idmap.bean.GtEnroll">  
-        <result column="enroll_id" property="enroll_id" javaType="int" jdbcType="INTEGER"/>
-        <result column="cmpt_id" property="cmpt_id" javaType="int" jdbcType="INTEGER"/>
-    </resultMap>
-    <resultMap id="account" type="com.neusoft.idmap.bean.AccountBean">  
-        <result column="id" property="id" javaType="int" jdbcType="INTEGER"/>
-        <result column="type" property="type" javaType="int" jdbcType="INTEGER"/>
-        <result column="username" property="username" javaType="String" jdbcType="VARCHAR"/>
-        <result column="password" property="password"  javaType="String" jdbcType="VARCHAR"/>
-        <result column="neuUserId" property="neuUserId"  javaType="int" jdbcType="INTEGER"/>
+<mapper namespace="com.crusoe.relaxedintegration.data.user.mapper.UserMapper">  
+    <resultMap id="rUser" type="com.crusoe.relaxedintegration.data.user.bean.RUser">  
+        <result column="rUserId" property="rUserId" javaType="Integer" jdbcType="INTEGER"/>
+        <result column="s1UserId" property="s1UserId" javaType="String" jdbcType="VARCHAR"/>
+        <result column="s2UserId" property="s2UserId" javaType="String" jdbcType="VARCHAR"/>
+        <result column="s3UserId" property="s3UserId" javaType="String" jdbcType="VARCHAR"/>
+        <result column="feature1" property="feature1" javaType="String" jdbcType="VARCHAR"/>
+        <result column="feature2" property="feature2" javaType="String" jdbcType="VARCHAR"/>
+        <result column="feature3" property="feature3" javaType="String" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List" >
 	   neuUser.neuUserId,gUserId,wUserId,gtUserId,role
 	</sql> 
 	
-   <!--根据unionId查找neuAdminBean--> 
-    <select id="searchNeuAdminByUnionId" resultMap="neuUser" parameterType="java.lang.String">  
-        select  
-         <include refid="Base_Column_List"/>
-         from common.neuUser left join common.account
-         on neuUser.neuUserId=account.neuUserId 
-         where account.username=#{unionId}	limit 1
-			
-    </select>
-    <!--根据phoneNum查找neuAdminBean--> 
-    <select id="searchNeuAdminByPhoneNum" resultMap="neuUser">  
-        select  
-         <include refid="Base_Column_List"/>
-         from common.neuUser left join common.account
-         on neuUser.neuUserId=account.neuUserId 
-         where account.username=#{phoneNum}	and neuUser.role=#{role} limit 1
-    </select>
-     <!--根据phoneNum查找neuAdminBean--> 
-    <select id="searchAdminInfo" resultMap="neuUser">  
-       select  
-         <include refid="Base_Column_List"/>
-         from common.neuUser
-         <where>
-             <if test='"gt"==mark'>
-               gtUserId=#{userId}
-             </if>
-             <if test='"g"==mark'>
-               gUserId=#{userId}
-             </if>
-             <if test='"w"==mark'>
-               wUserId=#{userId}
-             </if>
-             <if test='"i"==mark'>
-               neuUserId=#{userId}
-             </if>
-         </where>
-          limit 1	
-    </select>
-    <!--根据neuUserId查找neuAdminBean--> 
-    <select id="searchNeuAdminByNeuUserId" resultMap="neuUser" parameterType="java.lang.Integer">  
-        select  
-         <include refid="Base_Column_List"/>
-         from common.neuUser
-         where neuUserId=#{neuUserId} limit 1
-    </select>
-    
-    <!--插入用户系统所有相关数据-->
-    <insert id="insertNeuAdminInfo" useGeneratedKeys="true" keyProperty="neuUserId" parameterType="com.neusoft.idmap.mapper.IdMapMapper">
-		insert into common.neuUser(gUserId,wUserId,gtUserId,role, neuUserId) 
-		values(#{gUserId},#{wUserId},#{gtUserId},#{role}, #{neuUserId})
-		<!--selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="neuUserId">
-			SELECT LAST_INSERT_ID() AS neuUserId    
-    	</selectKey-->	
-	</insert>
-	 <!--插入用户系统账户的相关数据，如果不存在才插入，按type+username为逻辑主键-->
-    <insert id="insertAccountInfo"  parameterType="com.neusoft.idmap.bean.AccountBean">
-		insert into common.account(type,username,password,neuUserId) 
-		select #{type}, #{username}, #{password},ifnull(#{neuUserId}, LAST_INSERT_ID())
-	    from dual  where not exists
-       (select 1 from account where type=#{type} and username=#{username})
-	</insert>
-	 <!--更新用户账户的相关数据-->
-     <update id="updateAccountInfo">
-        update common.account
-        <set>
-        <if test="type!=null and type!=0">
-            type=#{type},
-        </if>
-        <if test="username!=null ">
-            username= #{username}, 
-        </if>
-        <if test="password!=null"> 
-            password= #{password}, 
-        </if>
-        </set> 
-        <where>
-             neuUserId = #{neuUserId}
-        </where> 	
-	</update>
-	 <!--更新用户系统的neuUserId和userId、source-->
-     <update id="updateAdminIdInfo">
-        update common.neuUser
-        <set>
-        <if test="role!=null and role!=0">
-            role=#{role},
-        </if>
-         <if test='"gt"==source and userId!=null'>
-               gtUserId=#{userId}
-         </if>
-         <if test='"g"==source and userId!=null'>
-               gUserId=#{userId}
-         </if>
-         <if test='"w"==source and userId!=null'>
-               wUserId=#{userId}
-         </if>
-        </set> 
-        <where>
-             neuUserId = #{neuUserId}
-        </where> 	
-	</update>
-    
-    
-    
-    
-    
-    <!--各子系统查询部分 start--> 
-    
-    <!--报名系统部分 start--> 
-    <!--根据GUserId查找报名系统中的openId-->
-    <select id="getOpenIdByGuserId" resultType="java.lang.String" parameterType="java.lang.Integer">  
-        select openId 
-        from ${@com.neusoft.utils.Const@GEEXEK_ENROLL_DB}.registerInfo
-        where userId=#{userId} limit 1
-    </select>
-	 <!--根据GUserBean在报名系统创建用户并返回该用户id-->
-    <insert id="creategUserId" useGeneratedKeys="true" keyProperty="userId" parameterType="com.neusoft.idmap.bean.GUserBean">
-		insert into ${@com.neusoft.utils.Const@GEEXEK_ENROLL_DB}.registerInfo(unionId,callPhone) values(#{unionId},#{phoneNum})
-	</insert>
-	<!--根据GUserBean查找报名系统中的userId--> 
-    <select id="getgUserId" resultType="java.lang.Integer" parameterType="com.neusoft.idmap.bean.GUserBean">  
-        <![CDATA[select  
-         userId from ${@com.neusoft.utils.Const@GEEXEK_ENROLL_DB}.registerInfo
-         where unionId=#{unionId} and unionId <> '' or callPhone=#{phoneNum} and callPhone <>'' limit 1
-		]]>	
-    </select>
-    <!--报名系统部分 end--> 
-    
-     <!--计时系统部分 start--> 
-    <!--根据GtUserBean查找计时系统中的userId--> 
-    <select id="getgtUserId" resultType="java.lang.Integer" parameterType="com.neusoft.idmap.bean.GtUserBean">  
-        <![CDATA[select  
-         id from ${@com.neusoft.utils.Const@GEEXEK_TIMER_DB}.sys_admin
-         where unionId=#{unionId} or user_id=#{phoneNum} limit 1
-		]]>	
-    </select>
-	<!--根据GtUserBean在计时系统创建用户并返回该用户id-->
-    <insert id="creategtUserId" useGeneratedKeys="true" keyProperty="id" parameterType="com.neusoft.idmap.bean.GUserBean">
-		insert into ${@com.neusoft.utils.Const@GEEXEK_TIMER_DB}.sys_admin(unionId,user_id,uuid,admin_psw, org_id) 
-		values(#{unionId},#{phoneNum},UUID(),"", 
-		concat('1-3-',((select ifnull(max(CAST(SUBSTR(org_id,5) AS SIGNED)),0) 
-		from ${@com.neusoft.utils.Const@GEEXEK_TIMER_DB}.sys_admin t
-		where org_id like '1-3-%')+1))
-		)
-	</insert>
-    <!--计时系统部分 end--> 
-    
-    <!--各子系统查询部分  end--> 
-        
-    <select id="getOrgIdByGtUserId" resultType="java.lang.String" parameterType="java.lang.Integer">  
-        select org_id 
-        from ${@com.neusoft.utils.Const@GEEXEK_TIMER_DB}.sys_admin
-        where id=#{gtUserId} limit 1
-    </select>
-    
-     <!--子系统登录部分相关方法  start--> 
-     <!--插入或更新NeuUser表--> 
-     <insert id="saveOrUpdateNeuUser" >
-         <selectKey keyProperty="count" resultType="java.lang.Integer" order="BEFORE">
-             select count(*) from account where username = #{username}
-         </selectKey>
-         <if test="count > 0">
-             update neuUser 
-             set gUserId = #{gUserId},wUserId = #{wUserId},gtUserId=#{gtUserId},role=#{role} 
-             where neuUserId = #{neuUserId}
-         </if>
-         <if test="count==0">
-             insert into neuUser(gUserId,wUserId,gtUserId,role)  values(#{gUserId},#{wUserId},#{gtUserId},#{role})
-         </if>
-     </insert>
-      <!--插入或更新account表--> 
-     <insert id="saveOrUpdateAccount" >
-         <selectKey keyProperty="count" resultType="java.lang.Integer" order="BEFORE">
-             select count(*) from account where username = #{username}
-         </selectKey>
-         <if test="count > 0">
-             update account 
-             set type = #{type},password = #{password},neuUserId=#{neuUserId}
-             where username = #{username} 
-         </if>
-         <if test="count==0">
-             insert into account(type,password,neuUserId)  values(#{type},#{password},#{neuUserId})
-         </if>
-     </insert>
-     <!--插入或更新计时用户表--> 
-     <insert id="saveOrUpdateGtUser">
-         <selectKey keyProperty="count" resultType="java.lang.Integer" order="BEFORE">
-             select count(*) from ${@com.neusoft.utils.Const@GEEXEK_TIMER_DB}.sys_admin
-              where user_id = #{phoneNum} or unionId = #{unionId}
-         </selectKey>
-         <if test="count > 0">
-             update ${@com.neusoft.utils.Const@GEEXEK_TIMER_DB}.sys_admin 
-             set admin_psw = #{password}
-             where user_id = #{phoneNum}
-         </if>
-         <if test="count==0">
-             insert into ${@com.neusoft.utils.Const@GEEXEK_TIMER_DB}.sys_admin(unionId,org_id,user_id,admin_psw,uuid) 
-              values(#{unionId},
-              concat('1-3-',((select ifnull(max(CAST(SUBSTR(org_id,5) AS SIGNED)),0)  from ${@com.neusoft.utils.Const@GEEXEK_TIMER_DB}.sys_admin t where org_id like '1-3-%')+1)),
-		      #{phoneNum},#{password},UUID())
-         </if>
-     </insert>
-     <!--插入或更新报名用户表--> 
-     <insert id="saveOrUpdateGUser">
-         <selectKey keyProperty="count" resultType="java.lang.Integer" order="BEFORE">
-             select count(*) from ${@com.neusoft.utils.Const@GEEXEK_ENROLL_DB}.registerInfo
-             where callPhone = #{phoneNum} or unionId = #{unionId}
-         </selectKey>
-         <if test="count > 0">
-             update ${@com.neusoft.utils.Const@GEEXEK_ENROLL_DB}.registerInfo 
-             set password = #{password}
-             where callPhone = #{phoneNum}
-         </if>
-         <if test="count==0">
-             insert into neuUser(callPhone,password,unionId)  values(#{phoneNum},#{password},#{unionId})
-         </if>
-     </insert>
-     
-      <!--根据phoneNum和password和role查找neuAdminBean--> 
-    <select id="getNeuUserByPhoneAndPWD" resultMap="neuUser">  
-        select  
-         <include refid="Base_Column_List"/>
-         from neuUser left join account
-         on neuUser.neuUserId=account.neuUserId 
-         where username=#{phoneNum}	and role=#{role} and password=#{password}	limit 1
-    </select>
-     
-     <!--子系统登录部分相关方法  end-->
-     
-     
-     <!--从赛客报名gUserId(用户id)获取赛客计时中对应的gtEnrollId(名单id) start-->
-     <!--根据报名系统的gUserId获取报名中的用户相关信息-->
-     <select id="getgRnrollInfo" resultMap="gEnroll">  
-        select  
-         callPhone,trueName,identityCard,openId
-         from ${@com.neusoft.utils.Const@GEEXEK_ENROLL_DB}.registerInfo
-         left join  ${@com.neusoft.utils.Const@GEEXEK_ENROLL_DB}.registerInfo_extend
-         on registerInfo.userId=registerInfo_extend.userId
-         where registerInfo.userId=#{userId}
-         limit 0,1	
-    </select>
-     
-     <!--获取计时系统中该用户的相关信息-->
-     <select id="getgtRnrollInfo" resultMap="gtEnroll">  
-        select  
-         enroll_id,cmpt_id
-         from ${@com.neusoft.utils.Const@GEEXEK_TIMER_DB}.cmpt_enroll  
-         where cmpt_id=#{cmpt_id}   and (member_name=#{username} and identity_no=#{idcard}
-         or member_name=#{username} and phone=#{phoneNum}) 
-         limit 0, 1	
-    </select>
-    <!--根据手机号码获取在报名系统中的userId-->
-      <select id="getgUserIdByphoneNum" resultType="java.lang.Integer">  
-        select  
-          userId
-        from ${@com.neusoft.utils.Const@GEEXEK_ENROLL_DB}.registerInfo 
-        where callPhone=#{phoneNum}
-        limit 0,1	
-    </select>
-     
-     <!--根据手机号码获取在计时系统中的userId-->
-     <select id="getgtUserIdByphoneNum" resultType="java.lang.Integer">  
-        select  
-         id
-         from ${@com.neusoft.utils.Const@GEEXEK_TIMER_DB}.sys_admin  
-         where user_id=#{phoneNum}) 
-         limit 0, 1	
-    </select>
-     <!--从赛客报名gUserId(用户id)获取赛客计时中对应的gtEnrollId(名单id) end-->
-     
-     
-     
-     <!--优化代码部分 m目标不能用 start-->
-      <select id="searchNeuUser" resultMap="neuUser">
-      <!--判别userId为哪一个子系统的用户id-->
-       <set>
-         <if test='"gt"==source'>
-               user_id="gtUserId" ;
-         </if>
-         <if test='"g"==source'>
-               user_id="gUserId" ;
-         </if>
-         <if test='"w"==source'>
-               user_id="wUserId" ;
-         </if>
-        </set> 
-      <!--根据userId、unionId、phoneNum依次查找用户数据库，一旦查到即停止-->
-        set neuUserId = ifnull((select neuUserId from neuUser where ${user_id}=#{userId}), 
-                               ifnull((select neuUserId from account where type=10 
-                               and username=#{unionId}),
-                                (select neuUserId from account where type=20 
-                                and username=#{phoneNum})));
-       <!--更新用户neuUser表系统中的相关信息-->
-        insert into neuUser(neuUserId, ${user_id}, role)
-        select neuUserId, #{userId}, #{role}
-        ON DUPLICATE KEY UPDATE ${user_id}=VALUES(${user_id});
-      <!--更新账户account表中的相关信息-->
-      <if test="unionId!=null">
-       insert into account(type, username, neuUserId)
-        select 10, #{unionId}, ifnull(neuUserId, LAST_INSERT_ID()) from dual 
-        where not exists (select 1 from account where type=10 and username=#{unionId});
-      </if>
-      <if test="phoneNum!=null">
-       insert into account(type, username, neuUserId)
-        select 20, #{phoneNum},ifnull(neuUserId, LAST_INSERT_ID()) from dual 
-        where not exists (select 1 from account where type=20 and username=#{phoneNum});
-      </if>
-      <!--返回新的neuUser-->
-        select  
-         <include refid="Base_Column_List"/>
-         from common.neuUser 
-         where neuUser.neuUserId=@neuUserId limit 1
-    </select>
-     <!--优化代码部分  end-->
-     
+	<select id="getRUser" resultMap="rUser" statementType="STATEMENT">  
+		set @sUserId='${userId}';
+		set @feature1=${feature1};
+		set @feature2=${feature2};
+		set @feature3=${feature3};
+		set @rUserId:=ifnull((select rUserId from ruser where ${source}UserId=@sUserId), -- 主键
+			ifnull((select rUserId from ruser where feature1=@feature1), 
+				ifnull((select rUserId from ruser where feature2=@feature2),
+					(select rUserId from ruser where feature3=@feature3))));
+					
+		insert into ruser(rUserId, ${source}UserId, feature1, feature2, feature3)
+		select @rUserId, @sUserId, @feature1, @feature2, @feature3
+		ON DUPLICATE KEY UPDATE 
+			${source}UserId=ifnull(values(${source}UserId), ${source}UserId),
+			feature1=ifnull(values(feature1), feature1),
+			feature2=ifnull(values(feature2), feature2),
+			feature3=ifnull(values(feature3), feature3);
+		
+		select * from ruser where rUserId=ifnull(@rUserId, LAST_INSERT_ID());
+  		
+	</select>    
+	
 	
 </mapper>
 

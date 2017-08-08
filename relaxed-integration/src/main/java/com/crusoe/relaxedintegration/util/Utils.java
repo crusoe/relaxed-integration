@@ -110,6 +110,15 @@ public class Utils {
 		}
     }
     
+    public static String toQuotedStr(String raw) {
+    	if (raw==null){
+    		return "null";
+    	}else{
+    		return new StringBuffer().append('\'').append(raw).append('\'').toString();
+    	}
+    }
+
+    
     public static void main(String[] args) {
 		String url=getClearUrlParam("gCmptId=334&gUserId=4561&key=Pc4oSYS2Tsm7HNbVzdrWAMrIicw%3D");
 		System.out.println(url);
